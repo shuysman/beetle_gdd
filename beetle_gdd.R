@@ -57,31 +57,25 @@ out_dir <- file.path("~/out")
 
 start_month <- 7
 
-cl <- parallel::makeCluster(cores)
-registerDoParallel(cl)
+mclapply(models,
+    function(model) {
+        for (scenario in scenarios) {
+            print(model)
+            print(scenario)
+            in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
+            r <- terra::rast(file.path(data_dir, in_filename))
+            
+            gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
 
-foreach(
-    model = iter(models),
-    scenario = iter(scenarios),
-    .export = c("start_month", "tbase_k", "data_dir", "out_dir", "beetle_year", "get_gdd"),
-    .packages = c("terra", "lubridate", "glue"),
-    .combine = 'c'
-) %dopar% {
-    in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
-    r <- terra::rast(file.path(data_dir, in_filename))
-    
-    gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
+            time(gdd) <- time(r)
 
-    time(gdd) <- time(r)
+            accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
 
-    accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
+            accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
 
-    accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
-
-    out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
-    writeRaster(accumgdd2, file.path(out_dir, out_filename))
-
-    NULL
-}
-
-stopCluster(cl)
+            out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
+            writeRaster(accumgdd2, file.path(out_dir, out_filename))
+        }
+    },
+    mc.cores = cores
+)
