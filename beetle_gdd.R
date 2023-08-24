@@ -66,6 +66,9 @@ foreach(
     .export = c("start_month", "tbase_k", "data_dir", "out_dir", "beetle_year", "get_gdd"),
     .packages = c("terra", "lubridate", "glue")
 ) %dopar% {
+    in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
+    r <- terra::rast(file.path(data_dir, in_filename))
+    
     gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
 
     time(gdd) <- time(r)
@@ -74,8 +77,8 @@ foreach(
 
     accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
 
-    filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
-    writeRaster(accumgdd2, file.path(out_dir, filename))
+    out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
+    writeRaster(accumgdd2, file.path(out_dir, out_filename))
 }
 
 stopCluster(cl)
