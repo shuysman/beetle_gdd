@@ -73,8 +73,16 @@ mclapply(models,
 
             accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
 
+            time(accumgdd2, tstep = "years") <- 2007:2099
+            
             out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
-            writeRaster(accumgdd2, file.path(out_dir, out_filename))
+            
+            writeCDF(accumgdd2,
+                        filename = file.path(out_dir, out_filename),
+                        varname = "Beetle_GDD",
+                        longname = "Beetle year growing degree days above 5.5C",
+                        unit = "deg_K")
+            
         }
     },
     mc.cores = cores
