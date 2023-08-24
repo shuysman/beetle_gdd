@@ -18,7 +18,7 @@ get_gdd <- function(t_k, tbase = tbase_k) {
     return(pmax(t_k - tbase, 0))
 }
 
-cores <- 34
+cores <- detectCores() - 2
 
 terraOptions(verbose = TRUE,
              memfrac = 0.9)
@@ -64,7 +64,8 @@ foreach(
     model = iter(models),
     scenario = iter(scenarios),
     .export = c("start_month", "tbase_k", "data_dir", "out_dir", "beetle_year", "get_gdd"),
-    .packages = c("terra", "lubridate", "glue")
+    .packages = c("terra", "lubridate", "glue"),
+    .combine = 'c'
 ) %dopar% {
     in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
     r <- terra::rast(file.path(data_dir, in_filename))
@@ -79,6 +80,8 @@ foreach(
 
     out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
     writeRaster(accumgdd2, file.path(out_dir, out_filename))
+
+    NULL
 }
 
 stopCluster(cl)
