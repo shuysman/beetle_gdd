@@ -4,6 +4,7 @@ library(foreach)
 library(doParallel)
 library(parallel)
 library(iterators)
+library(glue)
 library(tidyverse)
 
 beetle_year <- function(x) {
@@ -63,7 +64,7 @@ foreach(
     model = iter(models),
     scenario = iter(scenarios),
     .export = c("start_month", "tbase_k", "data_dir", "out_dir", "beetle_year", "get_gdd"),
-    .packages = c("terra", "lubridate")
+    .packages = c("terra", "lubridate", "glue")
 ) %dopar% {
     gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
 
@@ -72,6 +73,9 @@ foreach(
     accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
 
     accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
+
+    filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
+    writeRaster(accumgdd2, file.path(out_dir, filename))
 }
 
 stopCluster(cl)
