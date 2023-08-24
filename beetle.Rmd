@@ -1,0 +1,82 @@
+---
+title: 'Whitebark: Bark Beetle Univoltiminism'
+author: "Stephen Huysman"
+date: "`r Sys.Date()`"
+fontsize: 10pt 
+<!-- bibliography: fire.bib -->
+<!-- csl: global-ecology-and-biogeography.csl -->
+output:
+  html_document:
+    toc: true
+    toc_float: false
+---
+
+Tbase : 5.5C
+Calculate sum across beetle development - 1 August - 31 July
+
+``` R
+library(terra)
+library(lubridate)
+library(tidyverse)
+
+models <- c(
+    "bcc-csm1-1",
+    "BNU-ESM",
+    "CanESM2",
+    "CNRM-CM5",
+    "CSIRO-Mk3-6-0",
+    "GFDL-ESM2G",
+    "GFDL-ESM2M",
+    "HadGEM2-CC365",
+    "HadGEM2-ES365",
+    "inmcm4",
+    "IPSL-CM5A-LR",
+    "IPSL-CM5A-MR",
+    "IPSL-CM5B-LR",
+    "MIROC-ESM",
+    "MIROC-ESM-CHEM",
+    "MIROC5",
+    "MRI-CGCM3",
+ ##   "NorESM1-M"  ## Missing rcp85 scenario
+)
+            
+
+terraOptions(verbose = TRUE,
+             memfrac = 0.9)
+
+tbase_k <- 5.5 + 273.15
+
+data_dir <- file.path("/media/smithers/shuysman/data/MACA/gye/forecasts/daily")
+t_file <- file.path(data_dir, "tavg_inmcm4_rcp45_2006-2099_daily_gye.nc")
+
+r <- rast(t_file)
+
+## start_month <- 8
+start_month <- 7
+
+## start_month:(end_month + 12)
+
+## model <- "inmcm4"
+## pathway <- "rcp45"
+
+beetle_year <- function(x) {
+    index <- ymd(x)
+    index <- as.character(year(add_with_rollback(index, months(start_month))))
+    prename <- "y_"
+    return(paste0(prename, index))
+}
+
+get_gdd <- function(t_k, tbase = tbase_k) {
+    return(pmax(t_k - tbase, 0))
+}
+
+gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k, cores = 10)
+
+time(gdd) <- time(r)
+
+accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
+
+accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
+
+}```
+ 
