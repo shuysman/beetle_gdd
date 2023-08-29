@@ -55,7 +55,7 @@ out_dir <- file.path("~/out")
 
 ## r <- rast(t_file)
 
-start_month <- 7
+start_month <- 5
 
 mclapply(models,
     function(model) {
