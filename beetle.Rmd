@@ -7,7 +7,7 @@ bibliography: beetle.bib
 csl: global-ecology-and-biogeography.csl
 output:
   html_document:
-    toc: true
+    toc: false
     toc_float: false
 ---
 
@@ -36,9 +36,9 @@ Years correspond to years of beetle development, not calendar years.  See figure
 
 Dark grey line shows the GYE boundary, thin blue line shows existing whitebark pine distribution from https://whitebarkfound.org/our-work/national-whitebark-pine-restoration-plan/data/
 
-[Source code]{https://github.com/shuysman/beetle_gdd}
+[Source code](https://github.com/shuysman/beetle_gdd)
 
-``` {R, fig.height = 14, fig.width = 14, out.width = '100%', warning = FALSE, message = FALSE}
+``` {R, fig.height = 14, fig.width = 14, out.width = '100%', warning = FALSE, message = FALSE, echo = FALSE}
 library(terra)
 library(tidyterra)
 library(ggmap)
@@ -49,7 +49,7 @@ library(tidyverse)
 
 gdd_thresh <- 833 + 273.15
 
-gye_boundary <- st_read("/home/steve/OneDrive/whitebark/gyeboundary/GYE_boundary_dd.shp")
+gye_boundary <- st_read("/home/steve/OneDrive/whitebark/gyeboundary/GYE_boundary_dd.shp", quiet = TRUE)
 extent <- ext(gye_boundary)
 
 wbp_existing <- rast("/home/steve/OneDrive/whitebark/data/existing/wbp_existing.tif")
@@ -155,7 +155,7 @@ ggmap(base_map) +
 ```
 
 
-``` {R beetle-years, fig.height = 3, fig.width = 12, out.width = '100%'}
+``` {R beetle-years, fig.height = 3, fig.width = 12, out.width = '100%', echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Mapping of calendar years to 'beetle years' example"}
 start_month <- 5
 beetle_year <- function(x) {
     index <- ymd(x)
@@ -173,3 +173,6 @@ ggplot(data.frame(ex_dates = ex_dates, beetle_dates = beetle_dates)) +
 
 ##knitr::kable(cbind(as.character(ex_dates), beetle_dates))
 ```
+
+
+# References
