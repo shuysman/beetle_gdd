@@ -24,17 +24,19 @@ body {
 Accumulation of >833C (= 1106.15K) degree days (GDD) can allow mountain pine beetle (MPB) populations in mountainous regions to fully develop a new generation in a single year (univoltinism), as opposed to developing over several years (semivoltinism).  This has the potential to allow MPB outbreaks to become more severe.  Here, we show projections of beetle GDD in the Greater Yellowstone Ecosystem out to the end of the century.  Areas below this 1106.15K GDD threshold are shown, and areas exceeding it are hidden, in order to highlight the areas where beetle populations are likely to remaine semivoltine.  Lower GDD values would be associated with slower beetle development, and thus would be less likely to experience severe outbreaks of MPB.  
 
 Three methods are shown:
-1) Years exceeding the 1106.15K GDD threshold over the periods shown, averaged across all GCMs.  Beetle populations can exceed this threshold for a single year without resulting in a severe outbreak, but several years in sequence are likely to result in high tree mortality [@shanahanWhitebarkPineMortality2016]
-2) Average GDD values across the period the showns, across all GCMs
-3) Maximum GDD value projected by any GCM in the period shown.  This indicates whether a given pixel is likely to experience a single year above the GDD threshold across the period of interest.
 
-Tbase : 5.5C
+1. Years exceeding the 1106.15K GDD threshold over the periods shown, averaged across all GCMs.  Beetle populations can exceed this threshold for a single year without resulting in a severe outbreak, but several years in sequence are likely to result in high tree mortality [@shanahanWhitebarkPineMortality2016]
+2. Average GDD values across the periods shown, across all GCMs
+3. Maximum GDD value projected by any GCM in the period shown.  This indicates whether a given pixel is likely to experience a single year above the GDD threshold across the period of interest.
 
-Calculate GDD sum across beetle development year - 1 August - 31 July, Following @buotteClimateInfluencesWhitebark2016
+GDD is calculated using a base temperature of 5.5C
+max(0, T - 5.5)
+
+GDD is summed across beetle development year - 1 August - 31 July, Following @buotteClimateInfluencesWhitebark2016
 
 Years correspond to years of beetle development, not calendar years.  See figure at bottom for display of how calendar dates are mapped to "beetle years."
 
-Dark grey line shows the GYE boundary, thin blue line shows existing whitebark pine distribution from https://whitebarkfound.org/our-work/national-whitebark-pine-restoration-plan/data/
+The dark grey line shows the GYE boundary, the thin blue line shows existing whitebark pine distribution from https://whitebarkfound.org/our-work/national-whitebark-pine-restoration-plan/data/
 
 [Source code](https://github.com/shuysman/beetle_gdd)
 
