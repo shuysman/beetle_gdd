@@ -178,3 +178,5 @@ ggplot(data.frame(ex_dates = ex_dates, beetle_dates = beetle_dates)) +
 
 
 # References
+Computational efforts were performed on the Tempest High Performance Computing System, operated and supported by University Information Technology Research Cyberinfrastructure at Montana State University.
+
