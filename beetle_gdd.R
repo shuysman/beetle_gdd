@@ -71,8 +71,9 @@ mclapply(models,
 
             accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
 
+            ## cut off first and last layers in spatraster, they are incomplete because of "beetle year" indexing
             accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
-
+            
             time(accumgdd2, tstep = "years") <- 2007:2099
             
             out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
