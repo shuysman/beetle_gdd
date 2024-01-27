@@ -18,7 +18,7 @@ get_gdd <- function(t_k, tbase = tbase_k) {
     return(pmax(t_k - tbase, 0))
 }
 
-cores <- detectCores() - 2
+cores <- (detectCores() - 2) / 2
 
 terraOptions(verbose = TRUE,
              memfrac = 0.9)
@@ -48,6 +48,7 @@ models <- c(
 
 scenarios <- c("rcp45", "rcp85")
 
+##data_dir <- file.path("/media/smithers/shuysman/data/MACA/gye/forecasts/daily")
 data_dir <- file.path("~/data/MACA/gye/forecasts/daily")
 out_dir <- file.path("~/out")
 
@@ -57,33 +58,37 @@ out_dir <- file.path("~/out")
 
 start_month <- 5
 
-mcmapply(
-    function(model, scenario) {
-        print(model)
-        print(scenario)
-        in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
-        r <- terra::rast(file.path(data_dir, in_filename))
-        
-        gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
-
-        time(gdd) <- time(r)
-
-        accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
-
-        ## cut off first and last layers in spatraster, they are incomplete because of "beetle year" indexing
-        accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
-        
-        time(accumgdd2, tstep = "years") <- 2007:2099
-        
-        out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
-        
-        writeCDF(accumgdd2,
-                 filename = file.path(out_dir, out_filename),
-                 varname = "Beetle_GDD",
-                 longname = "Beetle year growing degree days above 5.5C",
-                 unit = "deg_K") 
-    },
+mclapply(
     models,
-    scenarios,
+    function(model) {
+        mclapply(scenarios,
+                 function(scenario) {
+                     print(model)
+                     print(scenario)
+                     in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
+                     r <- terra::rast(file.path(data_dir, in_filename))
+                     
+                     gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
+                     
+                     time(gdd) <- time(r)
+
+                     accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
+
+                     ## cut off first and last layers in spatraster, they are incomplete because of "beetle year" indexing
+                     accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
+                     
+                     time(accumgdd2, tstep = "years") <- 2007:2099
+                     
+                     out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
+                     
+                     writeCDF(accumgdd2,
+                              filename = file.path(out_dir, out_filename),
+                              varname = "Beetle_GDD",
+                              longname = "Beetle year growing degree days above 5.5C",
+                              unit = "deg_K")
+                 },
+        mc.cores = 2,
+        mc.allow.recursive = TRUE)
+    },
     mc.cores = cores
 )
