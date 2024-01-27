@@ -57,34 +57,33 @@ out_dir <- file.path("~/out")
 
 start_month <- 5
 
-mclapply(models,
-    function(model) {
-        for (scenario in scenarios) {
-            print(model)
-            print(scenario)
-            in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
-            r <- terra::rast(file.path(data_dir, in_filename))
-            
-            gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
+mcmapply(
+    function(model, scenario) {
+        print(model)
+        print(scenario)
+        in_filename <- glue("tavg_{model}_{scenario}_2006-2099_daily_gye.nc")
+        r <- terra::rast(file.path(data_dir, in_filename))
+        
+        gdd <- terra::app(r, fun = get_gdd, tbase = tbase_k)
 
-            time(gdd) <- time(r)
+        time(gdd) <- time(r)
 
-            accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
+        accumgdd <- terra::tapp(gdd, index = beetle_year, fun = "sum")
 
-            ## cut off first and last layers in spatraster, they are incomplete because of "beetle year" indexing
-            accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
-            
-            time(accumgdd2, tstep = "years") <- 2007:2099
-            
-            out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
-            
-            writeCDF(accumgdd2,
-                        filename = file.path(out_dir, out_filename),
-                        varname = "Beetle_GDD",
-                        longname = "Beetle year growing degree days above 5.5C",
-                        unit = "deg_K")
-            
-        }
+        ## cut off first and last layers in spatraster, they are incomplete because of "beetle year" indexing
+        accumgdd2 <- subset(accumgdd, seq(2, nlyr(accumgdd) - 1))
+        
+        time(accumgdd2, tstep = "years") <- 2007:2099
+        
+        out_filename <- glue("Beetle_GDD_{model}_{scenario}_2007-2099.nc")
+        
+        writeCDF(accumgdd2,
+                 filename = file.path(out_dir, out_filename),
+                 varname = "Beetle_GDD",
+                 longname = "Beetle year growing degree days above 5.5C",
+                 unit = "deg_K") 
     },
+    models,
+    scenarios,
     mc.cores = cores
 )
